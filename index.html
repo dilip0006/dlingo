@@ -242,7 +242,8 @@ async function translateUI(langCode) {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1200,
@@ -254,6 +255,7 @@ async function translateUI(langCode) {
     const parsed = JSON.parse(raw);
     applyStrings(parsed);
   } catch(e) {
+    console.error("UI translate error:", e);
     applyStrings(EN_STRINGS);
   }
 }
@@ -273,7 +275,8 @@ async function smartTranslate(text, fromLang, toLang, speaker) {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 600,
@@ -299,8 +302,9 @@ No markdown.` }]
     if (result.tts) speakText(result.tts, toLang);
     addHistory(speaker, result.clean || text, result.translation || "", fromLang, toLang);
   } catch(e) {
+    console.error("Translation error:", e);
     origEl.textContent = text;
-    transEl.textContent = "Translation error";
+    transEl.textContent = "Translation failed. Check console.";
     box.classList.remove("active");
   }
 }

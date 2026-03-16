@@ -258,7 +258,6 @@ async function translateUI(langCode) {
   }
 }
 
-
 // ─── SMART TRANSLATION ───
 async function smartTranslate(text, fromLang, toLang, speaker) {
   const fromName = LANG_NAMES[fromLang] || fromLang;
@@ -428,26 +427,22 @@ function swapLangs() {
   onMeeLangChange();
 }
 
-// ─── AUTO TRANSLATE ON PAGE LOAD ───
-// Save last used language in localStorage and restore on load
-document.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("dlingo-lang");
-  if (saved) {
-    const sel = document.getElementById("meeLang");
-    if ([...sel.options].some(o => o.value === saved)) {
-      sel.value = saved;
-    }
-  }
-  translateUI(document.getElementById("meeLang").value);
-});
-
-// Save language choice whenever it changes
-const _origOnChange = onMeeLangChange;
+// ─── LANGUAGE CHANGE HANDLER ───
 function onMeeLangChange() {
   const val = document.getElementById("meeLang").value;
   localStorage.setItem("dlingo-lang", val);
   translateUI(val);
 }
+
+// ─── AUTO TRANSLATE ON PAGE LOAD ───
+window.addEventListener("load", () => {
+  const sel = document.getElementById("meeLang");
+  const saved = localStorage.getItem("dlingo-lang");
+  if (saved && [...sel.options].some(o => o.value === saved)) {
+    sel.value = saved;
+  }
+  translateUI(sel.value);
+});
 </script>
 </body>
 </html>

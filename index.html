@@ -2,459 +2,534 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
 <title>dLingo BPO</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+<meta name="theme-color" content="#080810"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
-  :root {
-    --bg: #050d05; --bg2: #0a150a; --bg3: #0f1f0f;
-    --green: #00e676; --green2: #4caf50;
-    --text: #c8f5c8; --dim: #3a6e3a;
-    --red: #ff5252; --amber: #ffc107;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    min-height: 100vh; padding: 16px;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  body::before {
-    content: ''; position: fixed; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,230,118,0.015) 2px, rgba(0,230,118,0.015) 4px);
-    pointer-events: none; z-index: 999;
-  }
-  .container { width: 100%; max-width: 440px; }
-  .header { text-align: center; margin-bottom: 18px; animation: fadeDown 0.6s ease; }
-  .logo { font-size: 32px; font-weight: 700; color: var(--green); letter-spacing: 4px; font-family: 'Share Tech Mono'; text-shadow: 0 0 20px rgba(0,230,118,0.5); }
-  .bpo-badge { display: inline-block; background: var(--bg3); border: 1px solid var(--green); color: var(--green); padding: 2px 10px; border-radius: 5px; font-size: 12px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
-  .tagline { font-size: 10px; color: var(--dim); letter-spacing: 3px; margin-top: 4px; }
-  .card { background: var(--bg2); border: 1px solid var(--bg3); border-radius: 12px; padding: 16px; margin-bottom: 12px; animation: fadeUp 0.5s ease; }
-  .card-label { font-size: 10px; letter-spacing: 2px; color: var(--dim); margin-bottom: 10px; }
-  .status-bar { display: flex; align-items: center; gap: 8px; background: var(--bg2); border: 1px solid var(--bg3); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-  .status-text { font-size: 12px; color: var(--green); letter-spacing: 1px; font-family: 'Share Tech Mono'; }
-  .agent-id { font-family: 'Share Tech Mono'; font-size: 30px; color: var(--green); letter-spacing: 5px; text-align: center; margin: 8px 0 14px; text-shadow: 0 0 15px rgba(0,230,118,0.3); }
-  .btn-row { display: flex; gap: 10px; justify-content: center; }
-  .btn { background: var(--bg3); border: 1px solid #2a5a2a; color: #a5d6a7; border-radius: 8px; padding: 8px 20px; cursor: pointer; font-family: 'Rajdhani'; font-size: 14px; font-weight: 600; transition: all 0.2s; letter-spacing: 1px; }
-  .btn:hover { background: #152515; border-color: var(--green2); color: var(--green); }
-  .btn:active { transform: scale(0.97); }
-  .lang-row { display: flex; align-items: center; gap: 8px; }
-  .lang-box { flex: 1; }
-  select { width: 100%; background: var(--bg); border: 1px solid #1a3a1a; color: var(--text); border-radius: 7px; padding: 9px 10px; font-family: 'Rajdhani'; font-size: 14px; font-weight: 600; outline: none; cursor: pointer; }
-  select:focus { border-color: var(--green2); }
-  .swap-btn { background: var(--bg3); border: 1px solid #2a5a2a; border-radius: 50%; width: 34px; height: 34px; color: var(--green2); cursor: pointer; font-size: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-  .swap-btn:hover { border-color: var(--green); color: var(--green); transform: rotate(180deg); }
-  .call-row { display: flex; gap: 10px; }
-  .call-input { flex: 1; background: var(--bg); border: 1px solid #1a3a1a; border-radius: 8px; padding: 12px 14px; color: var(--text); font-family: 'Share Tech Mono'; font-size: 14px; outline: none; letter-spacing: 2px; }
-  .call-input:focus { border-color: var(--green2); }
-  .call-btn { background: #00c853; border: none; border-radius: 10px; width: 50px; height: 50px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-  .call-btn:hover { background: #00e676; transform: scale(1.05); }
-  .trans-panel { margin-top: 4px; }
-  .trans-title { font-size: 11px; letter-spacing: 2px; color: var(--dim); text-align: center; margin-bottom: 10px; }
-  .speaker-row { display: flex; gap: 10px; margin-bottom: 10px; }
-  .speaker-box { flex: 1; background: var(--bg); border: 1px solid #1a3a1a; border-radius: 10px; padding: 12px; min-height: 90px; }
-  .speaker-box.active { border-color: var(--green2); box-shadow: 0 0 12px rgba(0,230,118,0.15); }
-  .speaker-label { font-size: 10px; color: var(--dim); letter-spacing: 2px; margin-bottom: 6px; }
-  .speaker-text { font-size: 14px; color: var(--text); line-height: 1.5; min-height: 40px; }
-  .speaker-translated { font-size: 13px; color: var(--green2); margin-top: 6px; font-style: italic; }
-  .mic-section { display: flex; justify-content: center; gap: 16px; margin-bottom: 10px; }
-  .mic-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; color: var(--text); }
-  .mic-circle { width: 58px; height: 58px; border-radius: 50%; background: var(--bg3); border: 2px solid #2a5a2a; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s; }
-  .mic-btn.listening .mic-circle { background: #1a3a1a; border-color: var(--green); animation: sonar 1.5s infinite; }
-  .mic-btn.processing .mic-circle { border-color: var(--amber); box-shadow: 0 0 12px rgba(255,193,7,0.3); }
-  .mic-label { font-size: 11px; color: var(--dim); letter-spacing: 1px; font-weight: 600; }
-  .mic-btn.listening .mic-label { color: var(--green); }
-  .history-section { margin-top: 8px; }
-  .history-label { font-size: 10px; color: var(--dim); letter-spacing: 2px; margin-bottom: 6px; }
-  .history-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-  .history-item { background: var(--bg); border-left: 2px solid var(--bg3); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
-  .history-item.agent { border-left-color: var(--green2); }
-  .history-item.customer { border-left-color: #2979ff; }
-  .history-original { color: var(--dim); font-size: 11px; margin-bottom: 2px; }
-  .history-translated { color: var(--text); }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--bg3); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
-  .footer { text-align: center; color: var(--dim); font-size: 11px; margin-top: 8px; line-height: 1.8; }
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
-  @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  @keyframes sonar    { 0%{box-shadow:0 0 0 0 rgba(0,230,118,0.4)} 70%{box-shadow:0 0 0 14px rgba(0,230,118,0)} 100%{box-shadow:0 0 0 0 rgba(0,230,118,0)} }
-  @keyframes spin     { to { transform: rotate(360deg); } }
-  .history-list::-webkit-scrollbar { width: 4px; }
-  .history-list::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080810;font-family:'Space Grotesk',sans-serif;color:#f0f0f5;min-height:100vh}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px #22c55e40}50%{box-shadow:0 0 40px #22c55e80}}
+@keyframes ripple{0%{transform:scale(1);opacity:1}100%{transform:scale(2.5);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scan{0%{top:-5%}100%{top:105%}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.scan{position:fixed;left:0;right:0;height:2px;background:linear-gradient(transparent,rgba(34,197,94,.05),transparent);animation:scan 8s linear infinite;pointer-events:none;z-index:999}
+.app{min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#0a1f0a,#080810 60%);padding:14px 12px 44px}
+.logo{font-size:22px;font-weight:700;background:linear-gradient(135deg,#22c55e,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+.logo em{font-size:11px;font-style:normal;-webkit-text-fill-color:#4a8a4a;margin-left:4px;background:linear-gradient(135deg,#22c55e30,#22c55e10);border:1px solid #22c55e30;border-radius:4px;padding:1px 6px}
+.tag{text-align:center;font-size:9px;color:#2a4a2a;letter-spacing:2px;text-transform:uppercase;margin:2px 0 14px}
+.st{text-align:center;padding:7px;border-radius:8px;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;border:1px solid #1a1a2a;background:#0a0a14;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:6px}
+.st.ok{color:#22c55e;border-color:#22c55e40}
+.st.wait{color:#f59e0b;border-color:#f59e0b40;animation:pulse 1s infinite}
+.st.live{color:#22c55e;border-color:#22c55e50;background:#0a1a0a}
+.st.err{color:#ef4444;border-color:#ef444440}
+.st-dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.st.live .st-dot{animation:blink .8s infinite}
+.idcard{background:linear-gradient(135deg,#0a180a,#0d1a0d);border:1px solid #1a3a1a;border-radius:14px;padding:14px;margin-bottom:10px;text-align:center}
+.idlbl{font-size:8px;letter-spacing:2px;color:#2a5a2a;text-transform:uppercase;margin-bottom:6px}
+.idval{font-size:22px;font-weight:700;letter-spacing:4px;color:#22c55e;font-family:monospace;margin-bottom:8px}
+.idbts{display:flex;gap:8px;justify-content:center}
+.bc{background:#0a1a0a;border:1px solid #1a4a1a;color:#22c55e;padding:7px 14px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit}
+.bs{background:#0a140d;border:1px solid #1a3a4a;color:#3b82f6;padding:7px 14px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit}
+.lr{display:grid;grid-template-columns:1fr 30px 1fr;gap:8px;align-items:center;margin-bottom:10px}
+.lb{background:#0d0d1a;border:1px solid #1a1a2a;border-radius:10px;padding:10px}
+.ll{font-size:8px;letter-spacing:2px;color:#2a2a4a;text-transform:uppercase;margin-bottom:5px}
+.lf{font-size:20px;text-align:center;margin-bottom:5px}
+select{width:100%;background:#080810;border:1px solid #1a1a2a;border-radius:6px;color:#c0c0d0;font-family:inherit;font-size:10px;padding:6px;cursor:pointer;outline:none;appearance:none}
+.swp{width:28px;height:28px;border-radius:50%;border:1px solid #2a2a3a;background:#0d0d1a;color:#4a4a7a;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.cb{background:#0d0d1a;border:1px solid #1e1e2e;border-radius:12px;padding:14px;margin-bottom:10px}
+.cl{font-size:8px;letter-spacing:2px;color:#3a3a5a;text-transform:uppercase;margin-bottom:8px}
+.cr{display:flex;gap:8px}
+.ci{flex:1;background:#080810;border:1px solid #1a1a2a;border-radius:8px;color:#e0e0f0;font-family:monospace;font-size:18px;padding:9px 12px;outline:none;letter-spacing:4px;font-weight:700;text-transform:uppercase}
+.ci::placeholder{font-size:11px;letter-spacing:1px;font-weight:400;text-transform:none;color:#2a2a4a;font-family:inherit}
+.cgo{background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;padding:10px 18px;border-radius:8px;font-size:20px;cursor:pointer}
+.ac{display:none;background:#0a100a;border:1px solid #22c55e20;border-radius:14px;padding:14px;margin-bottom:10px}
+.ac.show{display:block}
+.bpo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.bpo-panel{background:#080e08;border:1px solid #1a2a1a;border-radius:10px;padding:10px}
+.bp-label{font-size:8px;letter-spacing:2px;color:#2a4a2a;text-transform:uppercase;margin-bottom:6px}
+.bp-flag{font-size:18px;text-align:center;margin-bottom:4px}
+.bp-status{font-size:9px;color:#2a4a2a;text-align:center;height:14px}
+.bp-status.active{color:#22c55e;animation:blink .8s infinite}
+.bp-text{background:#060c06;border:1px solid #1a2a1a;border-radius:6px;padding:7px 8px;margin-top:6px;font-size:11px;line-height:1.5;color:#4a6a4a;min-height:40px;word-break:break-word}
+.bp-text.has{color:#d0f0d0;animation:fadeUp .3s ease}
+.bp-text.tr{color:#22c55e}
+.call-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:8px 10px;background:#060c06;border:1px solid #1a2a1a;border-radius:8px}
+.ci-timer{font-size:16px;font-weight:700;color:#22c55e;letter-spacing:2px;font-family:monospace}
+.ci-id{font-size:10px;color:#2a4a2a}
+.ci-mode{font-size:9px;color:#22c55e;background:#0a1a0a;border:1px solid #1a3a1a;padding:3px 8px;border-radius:12px}
+.mode-bar{display:flex;gap:8px;margin-bottom:10px}
+.mode-btn{flex:1;padding:8px;border-radius:8px;font-size:10px;cursor:pointer;font-family:inherit;letter-spacing:1px;text-transform:uppercase;border:1px solid #2a2a3a;background:#0d0d1a;color:#4a4a7a;transition:all .2s}
+.mode-btn.active{background:#0a1a0a;border-color:#22c55e40;color:#22c55e}
+.auto-st{text-align:center;font-size:9px;padding:6px;border-radius:6px;background:#060c06;border:1px solid #1a2a1a;color:#2a4a2a;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
+.auto-st.listening{color:#22c55e;border-color:#22c55e30;animation:pulse .8s infinite}
+.auto-st.translating{color:#3b82f6;border-color:#3b82f640}
+.auto-st.speaking{color:#f59e0b;border-color:#f59e0b40}
+.ma{display:flex;justify-content:center;align-items:center;gap:14px;margin:10px 0}
+.mb{width:64px;height:64px;border-radius:50%;border:2px solid #22c55e;background:linear-gradient(135deg,#0a1a0a,#060e06);color:#22c55e;cursor:pointer;font-size:24px;display:flex;align-items:center;justify-content:center;position:relative;-webkit-tap-highlight-color:transparent}
+.mb.on{animation:glow 1.5s ease-in-out infinite}
+.mb.on::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid #22c55e30;animation:ripple 1s ease-out infinite}
+.eb{width:50px;height:50px;border-radius:50%;border:2px solid #ef4444;background:#1a0808;color:#ef4444;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.inc{display:none;position:fixed;inset:0;background:#000c;z-index:100;align-items:center;justify-content:center}
+.inc.show{display:flex}
+.ic{background:linear-gradient(135deg,#0a180a,#0d1a0d);border:2px solid #22c55e60;border-radius:20px;padding:26px 22px;text-align:center;max-width:280px;width:90%;animation:fadeUp .3s ease}
+.ir{font-size:46px;animation:pulse .8s infinite;margin-bottom:8px}
+.iid{font-size:22px;font-weight:700;color:#22c55e;letter-spacing:4px;font-family:monospace;margin-bottom:12px}
+.ibt{display:flex;gap:12px;justify-content:center}
+.ya{width:58px;height:58px;border-radius:50%;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:22px;cursor:pointer}
+.no{width:58px;height:58px;border-radius:50%;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:22px;cursor:pointer}
+.hist{background:#060c06;border:1px solid #1a2a1a;border-radius:10px;padding:10px;max-height:140px;overflow-y:auto}
+.ht{font-size:8px;letter-spacing:2px;color:#2a4a2a;text-transform:uppercase;margin-bottom:6px}
+.hr{border-left:2px solid #1a3a1a;padding-left:7px;margin-bottom:6px;font-size:10px;line-height:1.5;animation:fadeUp .3s ease}
+.ho{color:#3a5a3a}.htr{color:#22c55e80}
+.note{text-align:center;font-size:9px;color:#1a2a1a;margin-top:12px;line-height:2}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#080810}::-webkit-scrollbar-thumb{background:#1a2a1a;border-radius:2px}
 </style>
 </head>
 <body>
-<div class="container">
-
-  <div class="header">
-    <div><span class="logo">dLingo</span><span class="bpo-badge">BPO</span></div>
-    <div class="tagline" id="ui-tagline">AUTO TRANSLATION · NO BUTTON PRESS · BPO READY</div>
-  </div>
-
-  <div class="status-bar">
-    <div class="status-dot"></div>
-    <div class="status-text" id="ui-status">✅ READY — Share your Agent ID and start calling</div>
-  </div>
-
-  <div class="card">
-    <div class="card-label" id="ui-agentIdLabel">🔑 MY AGENT ID</div>
-    <div class="agent-id">2XFNTG377B</div>
-    <div class="btn-row">
-      <button class="btn" onclick="copyId()">📋 <span id="ui-copy">Copy</span></button>
-      <button class="btn" onclick="shareId()">🏷️ <span id="ui-share">Share</span></button>
+<div class="scan"></div>
+<div class="inc" id="incOv">
+  <div class="ic">
+    <div class="ir">📞</div>
+    <div style="font-size:11px;color:#4a8a4a;margin-bottom:4px">Incoming BPO Call</div>
+    <div class="iid" id="callerId">------</div>
+    <div style="font-size:10px;color:#2a4a2a;margin-bottom:14px">Real-time translation ready</div>
+    <div class="ibt">
+      <button class="ya" onclick="acceptCall()">✓</button>
+      <button class="no" onclick="rejectCall()">✕</button>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="lang-row">
-      <div class="lang-box">
-        <div class="card-label" id="ui-myLang">MY LANGUAGE</div>
-        <select id="meeLang" onchange="onMeeLangChange()">
-          <option value="te">🇮🇳 Telugu</option>
-          <option value="pt">🇧🇷 Portuguese</option>
-          <option value="hi">🇮🇳 Hindi</option>
-          <option value="en">🇺🇸 English (US)</option>
-          <option value="es">🇪🇸 Spanish</option>
-          <option value="fr">🇫🇷 French</option>
-          <option value="ar">🇸🇦 Arabic</option>
-          <option value="zh">🇨🇳 Chinese</option>
-        </select>
-      </div>
-      <button class="swap-btn" onclick="swapLangs()">⇅</button>
-      <div class="lang-box">
-        <div class="card-label" id="ui-custLang">CUSTOMER LANGUAGE</div>
-        <select id="custLang">
-          <option value="zh">🇨🇳 Chinese</option>
-          <option value="en">🇺🇸 English (US)</option>
-          <option value="te">🇮🇳 Telugu</option>
-          <option value="hi">🇮🇳 Hindi</option>
-          <option value="pt">🇧🇷 Portuguese</option>
-          <option value="es">🇪🇸 Spanish</option>
-          <option value="fr">🇫🇷 French</option>
-          <option value="ar">🇸🇦 Arabic</option>
-          <option value="ja">🇯🇵 Japanese</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-label" id="ui-custIdLabel">📞 ENTER CUSTOMER ID TO CALL</div>
-    <div class="call-row">
-      <input class="call-input" id="customerId" placeholder="e.g. AB12CD" oninput="this.value=this.value.toUpperCase()"/>
-      <button class="call-btn">📞</button>
-    </div>
-  </div>
-
-  <div class="card trans-panel">
-    <div class="trans-title" id="ui-transTitle">🎙️ LIVE TRANSLATION — START SPEAKING</div>
-    <div class="speaker-row">
-      <div class="speaker-box" id="agentBox">
-        <div class="speaker-label" id="ui-agentBox">ME (AGENT)</div>
-        <div class="speaker-text" id="agentOrigText">
-          <span style="color:var(--dim);font-size:12px;" id="ui-agentHint">Press mic and start speaking...</span>
-        </div>
-        <div class="speaker-translated" id="agentTransText"></div>
-      </div>
-      <div class="speaker-box" id="custBox">
-        <div class="speaker-label" id="ui-custBox">CUSTOMER</div>
-        <div class="speaker-text" id="custOrigText">
-          <span style="color:var(--dim);font-size:12px;" id="ui-custHint">Waiting for customer to speak...</span>
-        </div>
-        <div class="speaker-translated" id="custTransText"></div>
-      </div>
-    </div>
-    <div class="mic-section">
-      <button class="mic-btn" id="agentMicBtn" onclick="toggleMic('agent')">
-        <div class="mic-circle">🎤</div>
-        <span class="mic-label" id="ui-agentMic">AGENT MIC</span>
-      </button>
-      <button class="mic-btn" id="custMicBtn" onclick="toggleMic('customer')">
-        <div class="mic-circle">🎤</div>
-        <span class="mic-label" id="ui-custMic">CUSTOMER MIC</span>
-      </button>
-    </div>
-    <div class="history-section">
-      <div class="history-label" id="ui-histLabel">📝 TRANSLATION HISTORY</div>
-      <div class="history-list" id="historyList">
-        <div style="color:var(--dim);font-size:12px;text-align:center;padding:10px;" id="ui-histEmpty">Conversation history appears here...</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div id="ui-footer1">✦ 100% Free · BPO Grade · Auto translate</div>
-    <div id="ui-footer2">📞 Calls accepted from anywhere in the world</div>
   </div>
 </div>
 
+<div class="app">
+  <div class="logo">dLingo <em>BPO</em></div>
+  <div class="tag">Auto Translation · No Button Press · BPO Ready</div>
+  <div class="st wait" id="st"><span class="st-dot"></span><span id="stTxt">Connecting...</span></div>
+
+  <div class="idcard">
+    <div class="idlbl">🔑 Mee Agent ID</div>
+    <div class="idval" id="myId">------</div>
+    <div class="idbts">
+      <button class="bc" onclick="copyId()">📋 Copy</button>
+      <button class="bs" onclick="shareId()">📤 Share</button>
+    </div>
+  </div>
+
+  <div class="lr">
+    <div class="lb">
+      <div class="ll">Mee Language</div>
+      <div class="lf" id="myFlag">🇮🇳</div>
+      <select id="myLang" onchange="upFlags()"></select>
+    </div>
+    <button class="swp" onclick="swpLangs()">⇅</button>
+    <div class="lb">
+      <div class="ll">Customer Language</div>
+      <div class="lf" id="thFlag">🇨🇳</div>
+      <select id="thLang" onchange="upFlags()"></select>
+    </div>
+  </div>
+
+  <div class="cb" id="callBox">
+    <div class="cl">📞 Customer ID enter chesi call cheyyandi</div>
+    <div class="cr">
+      <input class="ci" id="remId" placeholder="e.g. AB12CD" maxlength="10" oninput="this.value=this.value.toUpperCase()"/>
+      <button class="cgo" onclick="startCall()">📞</button>
+    </div>
+  </div>
+
+  <div class="ac" id="actCall">
+    <div class="call-info">
+      <div>
+        <div class="ci-timer" id="timer">00:00</div>
+        <div class="ci-id" id="conId">Connected</div>
+      </div>
+      <div class="ci-mode" id="modeLabel">🤖 AUTO</div>
+    </div>
+    <div class="mode-bar">
+      <button class="mode-btn active" id="btnAuto" onclick="setMode('auto')">🤖 Auto (BPO)</button>
+      <button class="mode-btn" id="btnManual" onclick="setMode('manual')">🎤 Manual</button>
+    </div>
+    <div class="auto-st" id="autoSt">Auto mode — matladite automatic translate avutundi</div>
+    <div class="bpo-grid">
+      <div class="bpo-panel">
+        <div class="bp-label">👤 Mee (Agent)</div>
+        <div class="bp-flag" id="myPFlag">🇮🇳</div>
+        <div class="bp-status" id="myStatus">—</div>
+        <div class="bp-text" id="mySpoken">Matladandi...</div>
+        <div class="bp-text tr" id="myTrans" style="margin-top:4px">Translation...</div>
+      </div>
+      <div class="bpo-panel" id="thPanel">
+        <div class="bp-label">👥 Customer</div>
+        <div class="bp-flag" id="thPFlag">🇨🇳</div>
+        <div class="bp-status" id="thStatus">—</div>
+        <div class="bp-text" id="thSpoken">Waiting...</div>
+        <div class="bp-text tr" id="thTrans" style="margin-top:4px">Translation...</div>
+      </div>
+    </div>
+    <div class="ma" id="manualCtrl" style="display:none">
+      <button class="eb" onclick="endCall()">📵</button>
+      <button class="mb" id="micBtn" onclick="toggleMic()">🎤</button>
+    </div>
+    <div id="autoCtrl" style="display:flex;justify-content:center;gap:14px;margin:10px 0;align-items:center">
+      <button class="eb" onclick="endCall()">📵</button>
+      <button class="mb on" style="cursor:default;font-size:14px;flex-direction:column;gap:2px">🟢<span style="font-size:8px">AUTO</span></button>
+    </div>
+  </div>
+
+  <div id="histBox" style="display:none">
+    <div class="hist">
+      <div class="ht">📋 Call Log</div>
+      <div id="histList"></div>
+    </div>
+  </div>
+  <div class="note">✦ 100% Free · BPO Grade · Auto translate<br/>📞 World ekkada nunchi aina call avutundi</div>
+</div>
+
 <script>
-const AGENT_ID = "2XFNTG377B";
-let currentListening = null;
-let recognition = null;
-let translationHistory = [];
-let uiTranslating = false;
+const LANGS=[
+  {c:"te",s:"te-IN",n:"Telugu",f:"🇮🇳"},
+  {c:"hi",s:"hi-IN",n:"Hindi",f:"🇮🇳"},
+  {c:"en",s:"en-US",n:"English",f:"🇺🇸"},
+  {c:"zh-CN",s:"zh-CN",n:"Chinese",f:"🇨🇳"},
+  {c:"ja",s:"ja-JP",n:"Japanese",f:"🇯🇵"},
+  {c:"ko",s:"ko-KR",n:"Korean",f:"🇰🇷"},
+  {c:"ar",s:"ar-SA",n:"Arabic",f:"🇸🇦"},
+  {c:"es",s:"es-ES",n:"Spanish",f:"🇪🇸"},
+  {c:"fr",s:"fr-FR",n:"French",f:"🇫🇷"},
+  {c:"de",s:"de-DE",n:"German",f:"🇩🇪"},
+  {c:"pt",s:"pt-BR",n:"Portuguese",f:"🇧🇷"},
+  {c:"ru",s:"ru-RU",n:"Russian",f:"🇷🇺"},
+  {c:"it",s:"it-IT",n:"Italian",f:"🇮🇹"},
+  {c:"ta",s:"ta-IN",n:"Tamil",f:"🇮🇳"},
+  {c:"kn",s:"kn-IN",n:"Kannada",f:"🇮🇳"},
+  {c:"ml",s:"ml-IN",n:"Malayalam",f:"🇮🇳"},
+  {c:"tr",s:"tr-TR",n:"Turkish",f:"🇹🇷"},
+  {c:"vi",s:"vi-VN",n:"Vietnamese",f:"🇻🇳"},
+  {c:"th",s:"th-TH",n:"Thai",f:"🇹🇭"},
+  {c:"id",s:"id-ID",n:"Indonesian",f:"🇮🇩"},
+  {c:"nl",s:"nl-NL",n:"Dutch",f:"🇳🇱"},
+  {c:"bn",s:"bn-IN",n:"Bengali",f:"🇧🇩"},
+  {c:"ur",s:"ur-PK",n:"Urdu",f:"🇵🇰"},
+  {c:"tl",s:"fil-PH",n:"Filipino",f:"🇵🇭"},
+];
 
-const LANG_NAMES = {
-  te:"Telugu", pt:"Portuguese", hi:"Hindi", en:"American English (US)",
-  es:"Spanish", fr:"French", ar:"Arabic", zh:"Chinese", ja:"Japanese"
-};
-const SPEECH_CODES = {
-  te:"te-IN", pt:"pt-BR", hi:"hi-IN", en:"en-US",
-  es:"es-ES", fr:"fr-FR", ar:"ar-SA", zh:"zh-CN", ja:"ja-JP"
-};
-
-const EN_STRINGS = {
-  "ui-tagline":     "AUTO TRANSLATION · NO BUTTON PRESS · BPO READY",
-  "ui-status":      "✅ READY — Share your Agent ID and start calling",
-  "ui-agentIdLabel":"🔑 MY AGENT ID",
-  "ui-copy":        "Copy",
-  "ui-share":       "Share",
-  "ui-myLang":      "MY LANGUAGE",
-  "ui-custLang":    "CUSTOMER LANGUAGE",
-  "ui-custIdLabel": "📞 ENTER CUSTOMER ID TO CALL",
-  "ui-transTitle":  "🎙️ LIVE TRANSLATION — START SPEAKING",
-  "ui-agentBox":    "ME (AGENT)",
-  "ui-custBox":     "CUSTOMER",
-  "ui-agentHint":   "Press mic and start speaking...",
-  "ui-custHint":    "Waiting for customer to speak...",
-  "ui-agentMic":    "AGENT MIC",
-  "ui-custMic":     "CUSTOMER MIC",
-  "ui-histLabel":   "📝 TRANSLATION HISTORY",
-  "ui-histEmpty":   "Conversation history appears here...",
-  "ui-footer1":     "✦ 100% Free · BPO Grade · Auto translate",
-  "ui-footer2":     "📞 Calls accepted from anywhere in the world"
-};
-
-// Hardcoded offline translations — works without internet
-const OFFLINE = {
-  te: {"ui-tagline":"ఆటో అనువాదం · బటన్ నొక్కకుండా · BPO రెడీ","ui-status":"✅ రెడీ — మీ Agent ID షేర్ చేసి కాల్ చేయండి","ui-agentIdLabel":"🔑 నా ఏజెంట్ ID","ui-copy":"కాపీ","ui-share":"షేర్","ui-myLang":"నా భాష","ui-custLang":"కస్టమర్ భాష","ui-custIdLabel":"📞 కస్టమర్ ID ఎంటర్ చేసి కాల్ చేయండి","ui-transTitle":"🎙️ లైవ్ అనువాదం — మాట్లాడటం ప్రారంభించండి","ui-agentBox":"నేను (ఏజెంట్)","ui-custBox":"కస్టమర్","ui-agentHint":"మైక్ నొక్కి మాట్లాడండి...","ui-custHint":"కస్టమర్ మాట్లాడటానికి వేచి ఉంది...","ui-agentMic":"ఏజెంట్ మైక్","ui-custMic":"కస్టమర్ మైక్","ui-histLabel":"📝 అనువాద చరిత్ర","ui-histEmpty":"సంభాషణ చరిత్ర ఇక్కడ కనిపిస్తుంది...","ui-footer1":"✦ 100% ఉచితం · BPO గ్రేడ్ · ఆటో అనువాదం","ui-footer2":"📞 ప్రపంచంలో ఎక్కడి నుండైనా కాల్ అవుతుంది"},
-  hi: {"ui-tagline":"ऑटो अनुवाद · बटन दबाने की जरूरत नहीं · BPO रेडी","ui-status":"✅ तैयार — अपना Agent ID शेयर करें और कॉल करें","ui-agentIdLabel":"🔑 मेरा एजेंट ID","ui-copy":"कॉपी","ui-share":"शेयर","ui-myLang":"मेरी भाषा","ui-custLang":"ग्राहक की भाषा","ui-custIdLabel":"📞 ग्राहक ID दर्ज करें और कॉल करें","ui-transTitle":"🎙️ लाइव अनुवाद — बोलना शुरू करें","ui-agentBox":"मैं (एजेंट)","ui-custBox":"ग्राहक","ui-agentHint":"माइक दबाएं और बोलें...","ui-custHint":"ग्राहक के बोलने की प्रतीक्षा...","ui-agentMic":"एजेंट माइक","ui-custMic":"ग्राहक माइक","ui-histLabel":"📝 अनुवाद इतिहास","ui-histEmpty":"बातचीत का इतिहास यहाँ दिखेगा...","ui-footer1":"✦ 100% मुफ्त · BPO ग्रेड · ऑटो अनुवाद","ui-footer2":"📞 दुनिया में कहीं से भी कॉल आ सकती है"},
-  pt: {"ui-tagline":"TRADUÇÃO AUTOMÁTICA · SEM PRESSIONAR BOTÃO · PRONTO BPO","ui-status":"✅ PRONTO — Compartilhe seu Agent ID e ligue","ui-agentIdLabel":"🔑 MEU AGENT ID","ui-copy":"Copiar","ui-share":"Compartilhar","ui-myLang":"MINHA LÍNGUA","ui-custLang":"LÍNGUA DO CLIENTE","ui-custIdLabel":"📞 INSIRA O ID DO CLIENTE PARA LIGAR","ui-transTitle":"🎙️ TRADUÇÃO AO VIVO — COMECE A FALAR","ui-agentBox":"EU (AGENTE)","ui-custBox":"CLIENTE","ui-agentHint":"Pressione o microfone e comece a falar...","ui-custHint":"Aguardando o cliente falar...","ui-agentMic":"MIC DO AGENTE","ui-custMic":"MIC DO CLIENTE","ui-histLabel":"📝 HISTÓRICO DE TRADUÇÃO","ui-histEmpty":"O histórico da conversa aparece aqui...","ui-footer1":"✦ 100% Gratuito · Nível BPO · Tradução automática","ui-footer2":"📞 Chamadas aceitas de qualquer lugar do mundo"},
-  zh: {"ui-tagline":"自动翻译 · 无需按键 · BPO就绪","ui-status":"✅ 就绪 — 分享您的Agent ID并开始通话","ui-agentIdLabel":"🔑 我的客服ID","ui-copy":"复制","ui-share":"分享","ui-myLang":"我的语言","ui-custLang":"客户语言","ui-custIdLabel":"📞 输入客户ID拨打电话","ui-transTitle":"🎙️ 实时翻译 — 开始说话","ui-agentBox":"我（客服）","ui-custBox":"客户","ui-agentHint":"按下麦克风开始说话...","ui-custHint":"等待客户说话...","ui-agentMic":"客服麦克风","ui-custMic":"客户麦克风","ui-histLabel":"📝 翻译记录","ui-histEmpty":"对话记录显示在这里...","ui-footer1":"✦ 完全免费 · BPO级别 · 自动翻译","ui-footer2":"📞 接受来自世界各地的通话"},
-  es: {"ui-tagline":"TRADUCCIÓN AUTOMÁTICA · SIN PRESIONAR BOTÓN · LISTO BPO","ui-status":"✅ LISTO — Comparte tu Agent ID y llama","ui-agentIdLabel":"🔑 MI AGENT ID","ui-copy":"Copiar","ui-share":"Compartir","ui-myLang":"MI IDIOMA","ui-custLang":"IDIOMA DEL CLIENTE","ui-custIdLabel":"📞 INGRESA EL ID DEL CLIENTE PARA LLAMAR","ui-transTitle":"🎙️ TRADUCCIÓN EN VIVO — EMPIEZA A HABLAR","ui-agentBox":"YO (AGENTE)","ui-custBox":"CLIENTE","ui-agentHint":"Presiona el micrófono y empieza a hablar...","ui-custHint":"Esperando que el cliente hable...","ui-agentMic":"MIC DEL AGENTE","ui-custMic":"MIC DEL CLIENTE","ui-histLabel":"📝 HISTORIAL DE TRADUCCIÓN","ui-histEmpty":"El historial de conversación aparece aquí...","ui-footer1":"✦ 100% Gratis · Grado BPO · Traducción automática","ui-footer2":"📞 Llamadas aceptadas desde cualquier parte del mundo"},
-  fr: {"ui-tagline":"TRADUCTION AUTO · SANS APPUYER · PRÊT BPO","ui-status":"✅ PRÊT — Partagez votre Agent ID et appelez","ui-agentIdLabel":"🔑 MON AGENT ID","ui-copy":"Copier","ui-share":"Partager","ui-myLang":"MA LANGUE","ui-custLang":"LANGUE DU CLIENT","ui-custIdLabel":"📞 ENTREZ L'ID CLIENT POUR APPELER","ui-transTitle":"🎙️ TRADUCTION EN DIRECT — COMMENCEZ À PARLER","ui-agentBox":"MOI (AGENT)","ui-custBox":"CLIENT","ui-agentHint":"Appuyez sur le micro et parlez...","ui-custHint":"En attente du client...","ui-agentMic":"MIC AGENT","ui-custMic":"MIC CLIENT","ui-histLabel":"📝 HISTORIQUE DE TRADUCTION","ui-histEmpty":"L'historique des conversations apparaît ici...","ui-footer1":"✦ 100% Gratuit · Niveau BPO · Traduction automatique","ui-footer2":"📞 Appels acceptés de partout dans le monde"},
-  ar: {"ui-tagline":"ترجمة تلقائية · بدون ضغط زر · جاهز BPO","ui-status":"✅ جاهز — شارك Agent ID وابدأ الاتصال","ui-agentIdLabel":"🔑 معرفي كوكيل","ui-copy":"نسخ","ui-share":"مشاركة","ui-myLang":"لغتي","ui-custLang":"لغة العميل","ui-custIdLabel":"📞 أدخل معرف العميل للاتصال","ui-transTitle":"🎙️ ترجمة مباشرة — ابدأ الكلام","ui-agentBox":"أنا (الوكيل)","ui-custBox":"العميل","ui-agentHint":"اضغط الميكروفون وتكلم...","ui-custHint":"في انتظار العميل...","ui-agentMic":"ميكروفون الوكيل","ui-custMic":"ميكروفون العميل","ui-histLabel":"📝 سجل الترجمة","ui-histEmpty":"سجل المحادثة يظهر هنا...","ui-footer1":"✦ مجاني 100% · درجة BPO · ترجمة تلقائية","ui-footer2":"📞 المكالمات مقبولة من أي مكان"}
-};
-
-function esc(str) {
-  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-}
-
-function applyStrings(strings) {
-  Object.entries(strings).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  });
-}
-
-async function translateUI(langCode) {
-  if (uiTranslating) return;
-  if (langCode === "en") { applyStrings(EN_STRINGS); return; }
-  // Instantly apply offline translation — no waiting, no API needed
-  if (OFFLINE[langCode]) { applyStrings(OFFLINE[langCode]); return; }
-  // Unknown language — call API
-  uiTranslating = true;
-  const langName = LANG_NAMES[langCode] || langCode;
-  document.getElementById("ui-status").innerHTML = '<span class="spinner"></span> Translating...';
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 1200,
-        messages: [{role:"user", content:
-          "Translate these UI strings to " + langName + " for a BPO call center app. " +
-          "Keep all emojis exactly as-is, only translate text after emoji. " +
-          "Return ONLY valid JSON with same keys, no markdown.\n\n" + JSON.stringify(EN_STRINGS)
-        }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content.map(i => i.text||"").join("").replace(/```json|```/g,"").trim();
-    applyStrings(JSON.parse(raw));
-  } catch(e) {
-    console.error("UI translate error:", e);
-    applyStrings(EN_STRINGS);
-  } finally {
-    uiTranslating = false;
-  }
-}
-
-function onMeeLangChange() {
-  const val = document.getElementById("meeLang").value;
-  localStorage.setItem("dlingo-lang", val);
-  translateUI(val);
-}
-
-window.addEventListener("load", () => {
-  const sel = document.getElementById("meeLang");
-  const saved = localStorage.getItem("dlingo-lang");
-  if (saved && [...sel.options].some(o => o.value === saved)) sel.value = saved;
-  translateUI(sel.value);
+['myLang','thLang'].forEach((id,i)=>{
+  const s=document.getElementById(id);
+  LANGS.forEach(l=>s.add(new Option(l.f+' '+l.n,l.c)));
+  s.value=i===0?'te':'zh-CN';
 });
-
-async function smartTranslate(text, fromLang, toLang, speaker) {
-  const fromName   = LANG_NAMES[fromLang] || fromLang;
-  const toLangName = LANG_NAMES[toLang]   || toLang;
-  const origEl = document.getElementById(speaker === "agent" ? "agentOrigText" : "custOrigText");
-  const transEl = document.getElementById(speaker === "agent" ? "agentTransText" : "custTransText");
-  const box     = document.getElementById(speaker === "agent" ? "agentBox" : "custBox");
-  origEl.innerHTML = '<span class="spinner"></span> ' + esc(text);
-  transEl.textContent = "";
-  box.classList.add("active");
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 600,
-        messages: [{role:"user", content:
-          "BPO call center translator. Speech recognition input: " + JSON.stringify(text) + "\n\n" +
-          "RULES:\n" +
-          "1. Fix repeated words: \"hi hi hi\" = \"hi\", \"hello hello\" = \"hello\"\n" +
-          "2. Remove stammering, understand MEANING\n" +
-          "3. Translate from " + fromName + " to " + toLangName + "\n" +
-          "4. Professional BPO tone\n" +
-          "5. English output = American English (US)\n\n" +
-          "Return ONLY JSON: {\"clean\":\"..\",\"translation\":\"..\",\"tts\":\"..\"}\nNo markdown."
-        }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content.map(i => i.text||"").join("").replace(/```json|```/g,"").trim();
-    const result = JSON.parse(raw);
-    origEl.textContent = result.clean || text;
-    transEl.textContent = result.translation || "";
-    box.classList.remove("active");
-    if (result.tts) speakText(result.tts, toLang);
-    addHistory(speaker, result.clean||text, result.translation||"", fromLang, toLang);
-  } catch(e) {
-    console.error("Translation error:", e);
-    origEl.textContent = text;
-    transEl.textContent = "Translation failed.";
-    box.classList.remove("active");
-  }
+const gL=c=>LANGS.find(l=>l.c===c);
+function upFlags(){
+  const mf=gL(document.getElementById('myLang').value)?.f||'🌐';
+  const tf=gL(document.getElementById('thLang').value)?.f||'🌐';
+  document.getElementById('myFlag').textContent=mf;
+  document.getElementById('thFlag').textContent=tf;
+  document.getElementById('myPFlag').textContent=mf;
+  document.getElementById('thPFlag').textContent=tf;
+}
+function swpLangs(){
+  const t=document.getElementById('myLang').value;
+  document.getElementById('myLang').value=document.getElementById('thLang').value;
+  document.getElementById('thLang').value=t;upFlags();
 }
 
-function toggleMic(who) {
-  if (currentListening === who) { stopListening(); return; }
-  if (currentListening) stopListening();
-  startListening(who);
+let peer,conn,incConn,myId;
+let callActive=false,tInt,tSec=0,hist=[];
+let mode='auto';
+let isSpeaking=false;
+let autoTimeout=null;
+
+function setSt(msg,cls){
+  document.getElementById('st').className='st '+(cls||'');
+  document.getElementById('stTxt').textContent=msg;
+}
+function setAutoSt(msg,cls){
+  const el=document.getElementById('autoSt');
+  el.className='auto-st '+(cls||'');
+  el.textContent=msg;
+}
+function genId(){
+  return (Math.random().toString(36).substr(2,5)+Math.random().toString(36).substr(2,5)).toUpperCase();
 }
 
-function startListening(who) {
-  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-    alert("Speech recognition not supported. Use Chrome or Edge."); return;
-  }
-  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  const meeLang = document.getElementById("meeLang").value;
-  const custLang = document.getElementById("custLang").value;
-  recognition.lang = SPEECH_CODES[who === "agent" ? meeLang : custLang] || "en-US";
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  currentListening = who;
-  const btn    = document.getElementById(who === "agent" ? "agentMicBtn" : "custMicBtn");
-  const origEl = document.getElementById(who === "agent" ? "agentOrigText" : "custOrigText");
-  btn.classList.add("listening");
-  origEl.innerHTML = '<span style="color:var(--green)">🔴 Listening...</span>';
-  let finalText = "";
-  recognition.onresult = (e) => {
-    let interim = "";
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalText += t + " ";
-      else interim = t;
-    }
-    origEl.textContent = (finalText + interim).trim() || "Listening...";
+function initPeer(){
+  setSt('Connecting...','wait');
+  peer=new Peer(genId(),{
+    host:'0.peerjs.com',port:443,secure:true,path:'/',
+    config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}
+  });
+  peer.on('open',id=>{myId=id;document.getElementById('myId').textContent=id;setSt('✅ Ready — ID share chesi call cheyyandi','ok');});
+  peer.on('connection',c=>{incConn=c;document.getElementById('callerId').textContent=c.peer;document.getElementById('incOv').classList.add('show');});
+  peer.on('error',()=>{setSt('⚠️ Reconnecting...','err');setTimeout(()=>{try{peer.destroy();}catch(e){}initPeer();},4000);});
+}
+
+function acceptCall(){
+  conn=incConn;
+  document.getElementById('incOv').classList.remove('show');
+  setupConn(conn.peer);
+  conn.on('data',rcvData);conn.on('close',onEnd);
+}
+function rejectCall(){incConn?.close();document.getElementById('incOv').classList.remove('show');}
+
+function startCall(){
+  const rid=document.getElementById('remId').value.trim().toUpperCase();
+  if(!rid||rid.length<4){alert('Valid ID enter cheyyandi!');return;}
+  if(!peer||!myId){alert('Server ready kaledu');return;}
+  setSt('📞 Calling '+rid+'...','wait');
+  conn=peer.connect(rid,{reliable:true});
+  conn.on('open',()=>setupConn(rid));
+  conn.on('data',rcvData);conn.on('close',onEnd);
+  conn.on('error',()=>setSt('❌ Failed','err'));
+}
+
+function setupConn(rid){
+  callActive=true;
+  document.getElementById('callBox').style.display='none';
+  document.getElementById('actCall').classList.add('show');
+  document.getElementById('conId').textContent='ID: '+rid;
+  setSt('🟢 BPO Live — '+rid,'live');
+  tSec=0;
+  tInt=setInterval(()=>{
+    tSec++;
+    document.getElementById('timer').textContent=
+      String(Math.floor(tSec/60)).padStart(2,'0')+':'+String(tSec%60).padStart(2,'0');
+  },1000);
+  setMode('auto');
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btnAuto').classList.toggle('active',m==='auto');
+  document.getElementById('btnManual').classList.toggle('active',m==='manual');
+  document.getElementById('manualCtrl').style.display=m==='manual'?'flex':'none';
+  document.getElementById('autoCtrl').style.display=m==='auto'?'flex':'none';
+  document.getElementById('modeLabel').textContent=m==='auto'?'🤖 AUTO':'🎤 MANUAL';
+  if(m==='auto'){startAutoListen();setAutoSt('🎙️ Listening — matladandi','listening');}
+  else{stopAutoListen();setAutoSt('Manual mode — 🎤 press chesi matladandi','');}
+}
+
+// ===== KEY FIX: Single-shot recognition, no continuous =====
+// Each recognition session captures ONE utterance then stops
+// This prevents word repetition completely
+
+let autoRecogRunning=false;
+
+function startAutoListen(){
+  if(autoRecogRunning||isSpeaking||!callActive||mode!=='auto')return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return;
+
+  const r=new SR();
+  const ml=document.getElementById('myLang').value;
+  r.lang=gL(ml)?.s||ml;
+  r.interimResults=false; // KEY FIX: only final results — no repeats!
+  r.continuous=false;     // KEY FIX: single utterance — stops automatically
+  r.maxAlternatives=1;
+
+  r.onstart=()=>{
+    autoRecogRunning=true;
+    setAutoSt('🎙️ Listening...','listening');
+    document.getElementById('myStatus').textContent='● Listening';
+    document.getElementById('myStatus').className='bp-status active';
   };
-  recognition.onend = () => {
-    if (currentListening === who) {
-      const text = finalText.trim();
-      if (text.length > 0) {
-        btn.classList.remove("listening");
-        btn.classList.add("processing");
-        const fromLang = who === "agent" ? meeLang : custLang;
-        const toLang   = who === "agent" ? custLang : meeLang;
-        smartTranslate(text, fromLang, toLang, who).finally(() => btn.classList.remove("processing"));
-      } else {
-        btn.classList.remove("listening");
-        origEl.innerHTML = '<span style="color:var(--dim);font-size:12px;">Listening stopped.</span>';
+
+  r.onresult=async(e)=>{
+    // Only take the LAST final result — no accumulation
+    const result=e.results[e.results.length-1];
+    if(result.isFinal){
+      const text=result[0].transcript.trim();
+      if(text&&text.length>1){
+        document.getElementById('mySpoken').textContent=text;
+        document.getElementById('mySpoken').className='bp-text has';
+        setAutoSt('⚙️ Translating...','translating');
+        await sendSp(text);
       }
-      currentListening = null;
     }
   };
-  recognition.onerror = (e) => {
-    btn.classList.remove("listening");
-    currentListening = null;
-    if (e.error !== "no-speech")
-      origEl.innerHTML = '<span style="color:var(--red)">Error: ' + esc(e.error) + '. Try again.</span>';
+
+  r.onend=()=>{
+    autoRecogRunning=false;
+    document.getElementById('myStatus').textContent='—';
+    document.getElementById('myStatus').className='bp-status';
+    // Restart after pause — fresh session = no word repeat
+    if(callActive&&mode==='auto'&&!isSpeaking){
+      autoTimeout=setTimeout(()=>startAutoListen(),1000);
+    }
   };
-  recognition.start();
+
+  r.onerror=(e)=>{
+    autoRecogRunning=false;
+    if(e.error==='no-speech'||e.error==='aborted'){
+      if(callActive&&mode==='auto'&&!isSpeaking){
+        autoTimeout=setTimeout(()=>startAutoListen(),500);
+      }
+      return;
+    }
+  };
+
+  try{r.start();}catch(e){autoRecogRunning=false;}
 }
 
-function stopListening() {
-  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
-  if (currentListening) {
-    const btn = document.getElementById(currentListening === "agent" ? "agentMicBtn" : "custMicBtn");
-    btn.classList.remove("listening");
-    btn.classList.remove("processing");
+function stopAutoListen(){
+  autoRecogRunning=false;
+  clearTimeout(autoTimeout);
+}
+
+// ===== MANUAL MODE =====
+let manualRecog=null,manualOn=false;
+
+function toggleMic(){manualOn?stopManualMic():startManualMic();}
+function startManualMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Chrome use cheyyandi');return;}
+  manualRecog=new SR();
+  const ml=document.getElementById('myLang').value;
+  manualRecog.lang=gL(ml)?.s||ml;
+  manualRecog.interimResults=true;
+  manualRecog.continuous=true;
+  manualRecog.maxAlternatives=1;
+  let lastFinal='';
+
+  manualRecog.onstart=()=>{
+    manualOn=true;
+    document.getElementById('micBtn').classList.add('on');
+    document.getElementById('micBtn').textContent='⏹';
+    document.getElementById('mySpoken').textContent='Listening...';
+    lastFinal='';
+  };
+
+  manualRecog.onresult=(e)=>{
+    // Only show NEW finals — prevent duplication
+    let newFinal='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)newFinal+=e.results[i][0].transcript+' ';
+    }
+    if(newFinal.trim()){
+      lastFinal+=newFinal;
+      document.getElementById('mySpoken').textContent=lastFinal.trim();
+      document.getElementById('mySpoken').className='bp-text has';
+    }
+  };
+
+  manualRecog.onend=async()=>{
+    if(manualOn){try{manualRecog.start();}catch(e){}return;}
+    document.getElementById('micBtn').classList.remove('on');
+    document.getElementById('micBtn').textContent='🎤';
+    if(lastFinal.trim())await sendSp(lastFinal.trim());
+  };
+
+  manualRecog.onerror=(e)=>{
+    if(e.error==='no-speech')return;
+    manualOn=false;
+    document.getElementById('micBtn').classList.remove('on');
+    document.getElementById('micBtn').textContent='🎤';
+  };
+  manualRecog.start();
+}
+function stopManualMic(){manualOn=false;try{manualRecog?.stop();}catch(e){}}
+
+// ===== TRANSLATE & SEND =====
+async function xlate(txt,fr,to){
+  if(fr===to)return txt;
+  try{
+    const r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+fr+'&tl='+to+'&dt=t&q='+encodeURIComponent(txt));
+    const d=await r.json();
+    return d[0]?.map(x=>x?.[0]).filter(Boolean).join('')||txt;
+  }catch{return txt;}
+}
+
+async function sendSp(text){
+  if(!conn||!callActive)return;
+  const ml=document.getElementById('myLang').value;
+  const tl=document.getElementById('thLang').value;
+  document.getElementById('myTrans').textContent='Translating...';
+  const tr=await xlate(text,ml,tl);
+  document.getElementById('myTrans').textContent=tr;
+  document.getElementById('myTrans').className='bp-text tr has';
+  setAutoSt('✅ Sent!','');
+  conn.send({type:'speech',text:tr,orig:text,fl:tl});
+  addHist(text,tr,ml,tl,'me');
+  if(mode==='auto'){
+    setTimeout(()=>{
+      if(callActive&&mode==='auto'&&!isSpeaking){
+        setAutoSt('🎙️ Listening...','listening');
+        startAutoListen();
+      }
+    },1200);
   }
-  currentListening = null;
 }
 
-function speakText(text, langCode) {
-  if (!window.speechSynthesis) return;
+async function rcvData(data){
+  if(data.type!=='speech')return;
+  const ml=document.getElementById('myLang').value;
+  const fin=await xlate(data.text,data.fl,ml)||data.text;
+  document.getElementById('thSpoken').textContent=data.orig||data.text;
+  document.getElementById('thSpoken').className='bp-text has';
+  document.getElementById('thTrans').textContent=fin;
+  document.getElementById('thTrans').className='bp-text tr has';
+  document.getElementById('thStatus').textContent='● Speaking';
+  document.getElementById('thStatus').className='bp-status active';
+  addHist(data.orig||data.text,fin,data.fl,ml,'them');
+
+  isSpeaking=true;
+  stopAutoListen();
+  setAutoSt('🔊 Customer speaking...','speaking');
+
   window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = SPEECH_CODES[langCode] || "en-US";
-  utt.rate = 0.95; utt.pitch = 1.0;
-  window.speechSynthesis.speak(utt);
+  const u=new SpeechSynthesisUtterance(fin);
+  u.lang=gL(ml)?.s||ml;u.rate=0.9;u.pitch=1;u.volume=1;
+  const vs=window.speechSynthesis.getVoices();
+  const ts=gL(ml)?.s||ml;
+  const m=vs.find(v=>v.lang===ts)||vs.find(v=>v.lang.startsWith(ts.split('-')[0]))||null;
+  if(m)u.voice=m;
+  u.onend=()=>{
+    isSpeaking=false;
+    document.getElementById('thStatus').textContent='—';
+    document.getElementById('thStatus').className='bp-status';
+    if(mode==='auto'&&callActive){
+      setTimeout(()=>{setAutoSt('🎙️ Listening...','listening');startAutoListen();},800);
+    }
+  };
+  window.speechSynthesis.speak(u);
 }
 
-function addHistory(speaker, original, translated, fromLang, toLang) {
-  translationHistory.unshift({speaker, original, translated, fromLang, toLang});
-  if (translationHistory.length > 20) translationHistory.pop();
-  renderHistory();
+function onEnd(){
+  callActive=false;manualOn=false;isSpeaking=false;
+  stopAutoListen();try{manualRecog?.stop();}catch(e){}
+  clearInterval(tInt);window.speechSynthesis.cancel();
+  document.getElementById('actCall').classList.remove('show');
+  document.getElementById('callBox').style.display='block';
+  document.getElementById('remId').value='';
+  setSt('📵 Call ended','');
 }
-function renderHistory() {
-  const list = document.getElementById("historyList");
-  if (translationHistory.length === 0) {
-    list.innerHTML = '<div style="color:var(--dim);font-size:12px;text-align:center;padding:10px;">' + esc(EN_STRINGS["ui-histEmpty"]) + '</div>';
-    return;
-  }
-  list.innerHTML = translationHistory.map(h =>
-    '<div class="history-item ' + h.speaker + '">' +
-      '<div class="history-original">' + (h.speaker==="agent"?"🎙️ Agent":"👤 Customer") +
-      ' (' + esc(LANG_NAMES[h.fromLang]) + ' → ' + esc(LANG_NAMES[h.toLang]) + '): ' + esc(h.original) + '</div>' +
-      '<div class="history-translated">' + esc(h.translated) + '</div>' +
-    '</div>'
-  ).join("");
+function endCall(){conn?.close();onEnd();}
+
+function addHist(orig,trans,fl,tl,who){
+  hist.push({orig,trans,fl,tl,who});if(hist.length>30)hist.shift();
+  document.getElementById('histBox').style.display='block';
+  document.getElementById('histList').innerHTML=hist.slice(-8).reverse().map(h=>`
+    <div class="hr">
+      <div class="ho">${h.who==='me'?'👤':'👥'} ${gL(h.fl)?.f||''} "${h.orig}"</div>
+      <div class="htr">${gL(h.tl)?.f||''} "${h.trans}"</div>
+    </div>`).join('');
 }
 
-function copyId() {
-  navigator.clipboard.writeText(AGENT_ID).catch(()=>{});
-  const lbl = document.getElementById("ui-copy");
-  const prev = lbl.textContent;
-  lbl.textContent = "Copied!";
-  setTimeout(() => lbl.textContent = prev, 1500);
+function copyId(){
+  navigator.clipboard?.writeText(myId).then(()=>{
+    const b=document.querySelector('.bc');b.textContent='✅ Copied!';
+    setTimeout(()=>b.textContent='📋 Copy',2000);
+  }).catch(()=>prompt('Mee ID:',myId));
 }
-function shareId() {
-  if (navigator.share) navigator.share({title:"dLingo Agent ID", text:"My Agent ID: " + AGENT_ID});
-  else copyId();
+function shareId(){
+  const msg='dLingo BPO — na tho connect avvandi!\nAgent ID: '+myId+'\nApp: https://dlingobridge.vercel.app';
+  if(navigator.share)navigator.share({title:'dLingo BPO Call',text:msg});
+  else{navigator.clipboard?.writeText(msg);alert('Copied! WhatsApp lo paste cheyyandi');}
 }
 
-function swapLangs() {
-  const m = document.getElementById("meeLang");
-  const c = document.getElementById("custLang");
-  const mVal = m.value, cVal = c.value;
-  if ([...c.options].some(o => o.value === mVal)) c.value = mVal;
-  if ([...m.options].some(o => o.value === cVal)) m.value = cVal;
-  onMeeLangChange();
-}
+upFlags();initPeer();
 </script>
 </body>
 </html>
